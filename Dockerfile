@@ -14,17 +14,14 @@ RUN apt-get update \
       ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Create system user (no fixed UID)
-RUN groupadd --system unbound \
- && useradd --system --gid unbound --no-create-home \
-    --shell /usr/sbin/nologin unbound
-
+# Copy engine configuration
 COPY unbound.conf /etc/unbound/unbound.conf
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 
 RUN chmod +x /usr/local/bin/healthcheck.sh \
  && chown -R unbound:unbound /etc/unbound /usr/local/bin/healthcheck.sh
 
+# Run as packaged unbound user
 USER unbound
 
 EXPOSE 5335/tcp 5335/udp
