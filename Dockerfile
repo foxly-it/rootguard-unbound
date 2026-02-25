@@ -7,7 +7,6 @@ LABEL org.opencontainers.image.source="https://github.com/foxly-it/rootguard-unb
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install minimal required packages
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       unbound \
@@ -15,11 +14,11 @@ RUN apt-get update \
       ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Create non-root runtime user
-RUN groupadd -g 1000 unbound \
- && useradd -u 1000 -g unbound -s /usr/sbin/nologin -m unbound
+# Create system user (no fixed UID)
+RUN groupadd --system unbound \
+ && useradd --system --gid unbound --no-create-home \
+    --shell /usr/sbin/nologin unbound
 
-# Copy default engine configuration
 COPY unbound.conf /etc/unbound/unbound.conf
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 
