@@ -2,23 +2,39 @@
 set -e
 
 # =========================================================
-# RootGuard Unbound Entrypoint
+# RootGuard Unbound – Enterprise Entrypoint
 # ---------------------------------------------------------
-# Runs as root (PID 1)
-# Unbound drops privileges internally
-# No ownership manipulation
+# Runtime Model:
+#  - PID 1 runs as root
+#  - Mounted state directory is prepared
+#  - Ownership is fixed for runtime user
+#  - DNSSEC trust anchor is bootstrapped if missing
+#  - Unbound drops privileges internally
+#
+# Security Model:
+#  - Requires CAP_CHOWN
+#  - Requires CAP_SETUID
+#  - Requires CAP_SETGID
+#  - No filesystem modifications outside state dir
 # =========================================================
 
-ROOTKEY="/var/lib/unbound/root.key"
+STATE_DIR="/var/lib/unbound"
+ROOTKEY="$STATE_DIR/root.key"
 
-# Ensure working directory exists
-mkdir -p /var/lib/unbound
+echo "[RootGuard] Preparing state directory..."
 
-# Initialize DNSSEC trust anchor if missing
+# Ensure state directory exists
+mkdir -p "$STATE_DIR"
+
+# Fix ownership (required for Docker volume mounts)
+chown -R unbound:unbound "$STATE_DIR"
+
+# Initialize DNSSEC trust anchor if not present
 if [ ! -f "$ROOTKEY" ]; then
-    echo "Initializing DNSSEC root trust anchor..."
+    echo "[RootGuard] Initializing DNSSEC trust anchor..."
     unbound-anchor -a "$ROOTKEY"
 fi
 
-# Start Unbound in foreground
+echo "[RootGuard] Starting Unbound..."
+
 exec "$@"
