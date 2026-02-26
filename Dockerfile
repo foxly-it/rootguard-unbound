@@ -15,18 +15,18 @@ RUN apt-get update \
       ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Create runtime directory
-RUN mkdir -p /var/lib/unbound \
- && chown -R unbound:unbound /var/lib/unbound
+RUN mkdir -p /var/lib/unbound
 
 COPY unbound.conf /etc/unbound/unbound.conf
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
+COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh /entrypoint.sh
 
 EXPOSE 5335/tcp 5335/udp
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD /usr/local/bin/healthcheck.sh
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["unbound", "-d", "-c", "/etc/unbound/unbound.conf"]
