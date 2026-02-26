@@ -10,6 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       unbound \
+      dns-root-data \
       dnsutils \
       ca-certificates \
  && rm -rf /var/lib/apt/lists/*
@@ -20,9 +21,7 @@ COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
 
 # IMPORTANT:
-# Do NOT switch to USER unbound.
-# Debian unbound expects to start as root and drop privileges internally.
-
+# Run as root. Debian unbound drops privileges internally.
 EXPOSE 5335/tcp 5335/udp
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
