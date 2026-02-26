@@ -1,8 +1,8 @@
 FROM debian:stable-slim
 
 LABEL org.opencontainers.image.title="rootguard-unbound"
-LABEL org.opencontainers.image.description="RootGuard DNS Engine (Unbound based on Debian packages)"
-LABEL org.opencontainers.image.vendor="Foxly RootGuard"
+LABEL org.opencontainers.image.description="Unbound DNS Resolver based on official Debian packages"
+LABEL org.opencontainers.image.vendor="Rootguard"
 LABEL org.opencontainers.image.source="https://github.com/foxly-it/rootguard-unbound"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -14,15 +14,14 @@ RUN apt-get update \
       ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy engine configuration
 COPY unbound.conf /etc/unbound/unbound.conf
 COPY healthcheck.sh /usr/local/bin/healthcheck.sh
 
-RUN chmod +x /usr/local/bin/healthcheck.sh \
- && chown -R unbound:unbound /etc/unbound /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
 
-# Run as packaged unbound user
-USER unbound
+# IMPORTANT:
+# Do NOT switch to USER unbound.
+# Debian unbound expects to start as root and drop privileges internally.
 
 EXPOSE 5335/tcp 5335/udp
 
