@@ -6,7 +6,34 @@
 
 Enterprise-grade Unbound DNS engine based on official Debian packages.
 
-Built and published automatically via GitHub Actions to GHCR.
+Built automatically via GitHub Actions and published to GHCR.
+
+---
+
+## Image
+
+```
+ghcr.io/foxly-it/rootguard-unbound
+```
+
+### Available Tags
+
+The image is automatically tagged using the official Debian Unbound package version.
+
+Example (if Debian provides `1.22.0-2+deb13u1`):
+
+```
+latest
+1.22.0-2-deb13u1
+1.22.0
+1.22
+```
+
+This guarantees:
+
+- Alignment with official Debian package versions
+- Transparent version traceability
+- Automatic security updates via scheduled rebuilds
 
 ---
 
@@ -15,19 +42,12 @@ Built and published automatically via GitHub Actions to GHCR.
 - Debian `stable-slim` base
 - Official Debian `unbound` package
 - Multi-architecture: `amd64` + `arm64`
-- Automatic daily rebuild (Security updates)
-- Runs as non-root (Debian packaged system user)
+- Automatic daily rebuild (security updates)
+- Version tagging based on Debian package version
+- Runs as Debian packaged `unbound` system user
 - Healthcheck included
 - Minimal default configuration (`127.0.0.1:5335`)
 - Designed for RootGuard integration
-
----
-
-## Image
-
-```
-ghcr.io/foxly-it/rootguard-unbound:latest
-```
 
 ---
 
@@ -62,6 +82,7 @@ services:
 - No custom UID/GID
 - Uses Debian packaged `unbound` system user
 - Minimal attack surface
+- Automatic version tracking
 - Daily CI rebuild for security patches
 
 ---
@@ -73,6 +94,7 @@ This image is automatically built via GitHub Actions:
 - Triggered on push to `main`
 - Daily scheduled rebuild
 - Multi-arch build using `docker buildx`
+- Debian package version automatically extracted
 - Published to GHCR
 
 ---
@@ -82,7 +104,9 @@ This image is automatically built via GitHub Actions:
 - Config override via RootGuard dashboard
 - Live config validation (`unbound-checkconf`)
 - Runtime reload (SIGHUP)
-- SBOM + image signing
+- Read-only filesystem hardening
+- SBOM generation
+- Image signing (Cosign)
 - Security scanning (Trivy)
 
 ---
