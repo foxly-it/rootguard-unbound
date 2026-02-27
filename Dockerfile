@@ -1,6 +1,6 @@
 ############################################################
 # RootGuard Unbound
-# Debian-based recursive DNS resolver with DNSSEC
+# Debian 13 (Trixie) based recursive resolver
 ############################################################
 
 FROM debian:stable-slim
@@ -8,9 +8,9 @@ FROM debian:stable-slim
 ############################################################
 # Install required packages
 #
-# - unbound            -> DNS resolver
-# - dns-root-data      -> official root hints
-# - ca-certificates    -> TLS trust store
+# unbound        -> DNS resolver
+# dns-root-data  -> root.hints + root.key
+# ca-certificates -> TLS trust store
 ############################################################
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -20,17 +20,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ############################################################
-# Create required directories
+# Create runtime directory
 #
-# /etc/unbound        -> configuration
-# /var/lib/unbound    -> DNSSEC trust anchor
-# /run/unbound        -> runtime (pid/socket)
+# /run/unbound is required because we do not use systemd
 ############################################################
-RUN mkdir -p /etc/unbound \
-    && mkdir -p /var/lib/unbound \
-    && mkdir -p /run/unbound \
-    && chown -R unbound:unbound /var/lib/unbound \
-    && chown -R unbound:unbound /run/unbound
+RUN mkdir -p /run/unbound && \
+    chown -R unbound:unbound /run/unbound
 
 ############################################################
 # Copy configuration
@@ -38,7 +33,7 @@ RUN mkdir -p /etc/unbound \
 COPY unbound.conf /etc/unbound/unbound.conf
 
 ############################################################
-# Copy entrypoint (no renaming!)
+# Copy entrypoint
 ############################################################
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
