@@ -1,19 +1,16 @@
 #!/bin/sh
 set -e
 
-############################################
-# RootGuard Runtime Validation
-############################################
+echo "Starting RootGuard Unbound..."
 
-# Prüfen ob Trust Anchor existiert
+# Ensure trust anchor exists
 if [ ! -f /var/lib/unbound/root.key ]; then
-  echo "========================================"
-  echo "FATAL: root.key missing."
-  echo "This container is immutable."
-  echo "Run init phase before starting runtime."
-  echo "========================================"
-  exit 1
+    echo "Generating DNSSEC trust anchor..."
+    unbound-anchor -a /var/lib/unbound/root.key
 fi
+
+# Ensure correct ownership
+chown -R unbound:unbound /var/lib/unbound
 
 # Start Unbound
 exec "$@"
