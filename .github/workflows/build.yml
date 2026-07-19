@@ -32,6 +32,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build validation image
+        run: docker build -t rootguard-unbound:test .
+
+      - name: Validate Unbound configuration
+        run: >-
+          docker run --rm --entrypoint unbound-checkconf
+          rootguard-unbound:test /etc/unbound/unbound.conf
+
       # 🔖 Extract Debian Unbound version
       - name: Extract Debian Unbound version
         id: version
