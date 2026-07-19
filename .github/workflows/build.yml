@@ -39,8 +39,8 @@ jobs:
 
       - name: Validate Unbound configuration
         run: >-
-          docker run --rm --entrypoint unbound-checkconf
-          rootguard-unbound:test /etc/unbound/unbound.conf
+          docker run --rm
+          rootguard-unbound:test unbound-checkconf /etc/unbound/unbound.conf
 
       # 🔖 Extract Debian Unbound version
       - name: Extract Debian Unbound version
