@@ -70,14 +70,14 @@ jobs:
 
       - name: Verify secure Unbound version
         run: |
-          VERSION="$(docker run --rm rootguard-unbound:test dpkg-query -W -f='${Version}' unbound)"
+          VERSION="$(docker run --rm --entrypoint dpkg-query rootguard-unbound:test -W -f='${Version}' unbound)"
           dpkg --compare-versions "$VERSION" ge "1.25.2-1"
           echo "Validated Unbound package: $VERSION"
 
       - name: Extract installed Unbound version
         id: version
         run: |
-          VERSION="$(docker run --rm rootguard-unbound:test dpkg-query -W -f='${Version}' unbound)"
+          VERSION="$(docker run --rm --entrypoint dpkg-query rootguard-unbound:test -W -f='${Version}' unbound)"
 
           # Sanitize version for Docker tag (replace + with -)
           SAFE_VERSION=$(echo "$VERSION" | sed 's/+/-/g')
