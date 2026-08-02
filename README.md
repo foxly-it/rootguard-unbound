@@ -38,6 +38,52 @@ Test recursive resolution:
 dig @127.0.0.1 -p 5335 example.com A
 ```
 
+### Rootless Podman
+
+Rootless Podman can run the same image without granting the container root
+privileges. On macOS and Windows, start the required rootless Podman machine
+first; native Linux does not require a machine:
+
+```sh
+podman machine init --now   # first run on macOS or Windows only
+```
+
+Create persistent named volumes and publish DNS only on host loopback:
+
+```sh
+podman run -d \
+  --name rootguard-unbound \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  -p 127.0.0.1:5335:5335/tcp \
+  -p 127.0.0.1:5335:5335/udp \
+  -v rootguard-unbound-config:/etc/unbound/unbound.d:U \
+  -v rootguard-unbound-state:/var/lib/unbound:U \
+  ghcr.io/foxly-it/rootguard-unbound:latest
+```
+
+The `:U` suffix lets rootless Podman map ownership of these dedicated named
+volumes to the image's fixed `100:101` identity. Do not apply `:U` to a host
+directory containing unrelated files because Podman changes ownership
+recursively.
+
+Verify recursive resolution and DNSSEC enforcement:
+
+```sh
+dig @127.0.0.1 -p 5335 example.com A +dnssec
+dig @127.0.0.1 -p 5335 dnssec-failed.org A
+```
+
+The signed response must contain the `ad` flag. The intentionally broken
+`dnssec-failed.org` domain must return `SERVFAIL`.
+
+Rootless networking does not give the container a LAN-reachable address. The
+two explicit loopback publications are therefore intentional: local clients
+can reach TCP and UDP 5335, while other hosts cannot use the resolver directly.
+On macOS and Windows the ports are forwarded through the Podman machine, which
+must remain running while the container is in use.
+
 The complete RootGuard stack connects AdGuard Home to this resolver and manages
 its modular configuration through a validated preview, versioning, and rollback
 workflow.
