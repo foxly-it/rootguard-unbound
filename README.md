@@ -1,5 +1,10 @@
 # RootGuard Unbound
 
+> [!IMPORTANT]
+> This repository is archived. Development moved to the
+> [`rootguard` monorepo](https://github.com/foxly-it/rootguard/tree/main/rootguard-unbound)
+> (`rootguard-unbound/` directory) — full history preserved there.
+
 ![RootGuard Unbound – Recursive DNS with DNSSEC](assets/rootguard-unbound-social-preview.png)
 
 **RootGuard Unbound is a hardened, multi-architecture recursive DNS resolver
